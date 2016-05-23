@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Udacity - Project 5</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="js/libs/jquery.min.js"></script>
+    <script src="js/libs/knockout-3.4.0.js"></script>
+</head>
+
+<body>
+    <div id="header">
+        <h1>Local-Global Data for Prevention of Sex Trafficking </h1>
+    </div>
+<div>
+<table>
+<tr>
+<td>
+    <div id="nav">
+    <p class='italic'>Selected local service centers: <strong data-bind="text:chosenItems"></strong></p>
+    <ul data-bind = "foreach: {data: sC, as: 'C'}">
+     <span class = 'italic' data-bind = "text: C.type"></span>:
+     <ul data-bind = "foreach: {data:names, as: 'name'}">
+    <input type ="checkbox" data-bind = "checkedValue:$data, checked:$root.chosenItems"/>
+    <span data-bind = "text: name"></span> <br>
+    </ul>
+    </ul>
+
+      <form id="form-container" class="form-container" data-bind="submit:dataRef">
+        <label for="street"><b>Report street where incident(s) observed:</b></label><input type="text" data-bind="value:streetC"><br>
+        <label for="city"><b>Information about your state:</b></label><input type="text" data-bind="value:cityC"><br>
+        <label for="state"><b>Research in your city:</b></label><input type="text" data-bind="value:stateC">
+        <button type ="submit"r>Submit</button>
+    </form>
+
+    </div>
+</td>
+<td>
+    <div id="map" style="width:500px;height:480px;"> Google Map </div>
+</td>
+</tr>
+</table>
+     <div class="nytimes-container">
+        <h3 id="nytimes-header" text-align:center>New York Times</h3>
+        <ul id="nytimes-articles" class="article-list"></ul>
+    </div>
+
+
+    <div class="wikipedia-container">
+        <h3 id="wikipedia-header" text-align:center>Wikipedia Links</h3>
+        <ul id="wikipedia-links"></ul>
+    </div>
+
+
+    <div class="nsf-container">
+        <h3 id="nsf-header" text-align:center>NSF Research in your City</h3>
+        <ul id="nsf-links"></ul>
+    </div>
+</div>
+<div id="footer">
+Data Science for Social Good<hr>
+</div>
+
+
+  <script async defer
+      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyARqBsd2hZYkdvQicvNwfhAwIwCmtMGSE4&callback=initMap">
+    </script>
+
+
+  <script src="js/scriptmap5.js"></script>
+</body>
+</html>
