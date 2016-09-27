@@ -1,0 +1,49 @@
+
+
+<!DOCTYPE html>
+<html>
+<head></head>
+
+<body>
+<canvas id="myCanvas" width="200" height="300"
+style="border:1px solid #000000;">
+</canvas>
+
+<script>
+
+
+
+
+
+	var myCanvas = document.querySelector("#myCanvas");
+	var ctx = myCanvas.getContext("2d");
+	var ctx1 = myCanvas.getContext("2d");
+
+	ctx.fillStyle = "gray";
+	ctx.strokeStyle = "black";
+	ctx.strokeText("Hello World!", 0, 0);
+
+ctx.beginPath();
+ctx.moveTo(40, 40);
+ctx.lineTo(20, 100);
+ctx.lineTo(70, 100);
+ctx.lineTo(40,40);
+ctx.fillStyle = "white";
+ctx.strokeStyle = "blue";
+ctx.stroke();
+ctx.fill();
+
+ctx1.textAlign = "center";
+ctx1.font = "36px impact";
+ctx1.fillStyle = "white";
+ctx1.strokeStyle = "black"
+ctx1.lineWidth = 3;
+ctx1.strokeText("hello", myCanvas.width/2, 50);
+ctx1.textAlign = "bottom";
+ctx1.fillText("world", 100, 70);
+
+</script>
+
+</body>
+</html>
+

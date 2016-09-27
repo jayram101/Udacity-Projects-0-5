@@ -1,0 +1,20 @@
+<body>
+<canvas id = "c"  width="300" height="300"> </canvas>
+
+<script>
+var c = document.querySelector("#c");
+var ctx = c.getContext("2d");
+ctx.font = 'italic 32pt Calibri, sans-serif';
+ctx.fillText('Hello Cookie!', 50, c.height);
+
+var image = new Image();
+
+image.onload = function () {
+      console.log("Loaded image at %s", image.src);
+      ctx.drawImage(image, 0,0);
+
+}
+
+image.src = "http://images.clipartpanda.com/cookie-monster-clip-art-cookiecookiecookie.jpg";
+</script>
+</body>

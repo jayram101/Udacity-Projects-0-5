@@ -1,0 +1,1 @@
+If you take a look at this line and at the Playerand Gem .render methods, you could see that they are similar. Also, theyhave x, y and sprite properties. This means, you could create a superclass (for example: 'character') with those common properties and method, and then make all of them subclasses of character using inheritance.

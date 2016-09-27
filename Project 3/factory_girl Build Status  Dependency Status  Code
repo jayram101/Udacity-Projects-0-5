@@ -1,0 +1,20 @@
+#Evade Bugs
+##The game is to move the Girl from the base and cross the river, capturing points by moving over the gems along the way. This game is written in HTML5, Java Script an uses the ??
+##Game works within any web browser.
+##Directory stucture
+The main directory has the main HTML index file, the subdirectories and files are:
+*css: style.css which governs the look of the page in which the game display
+*images: with different images you can use for the game
+*js: which has three files app.js, resources.js, engine.js.
+
+engine.js is the main loop and uses the animation frame; resource.js loads images; and app.js contains most of the applicaiton logic which can be modified.
+
+
+##Getting started
+Download the zip and extract the files.
+From your web browser open the index.html file.
+
+
+##Credits and license
+The game is based on templte files provided by Udacity
+You can modify and use this.

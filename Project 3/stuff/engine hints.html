@@ -1,0 +1,141 @@
+
+
+function draw() {
+    // request to execute this function at the next earliest convenience
+    requestAnimationFrame(draw);
+    processInput();
+    moveObjectsAndEnemies();
+    drawAllTheThings();
+}
+
+This refers to the class
+
+OOP envisions software as a collection of cooperating objects rather than a collection of functions or simply a list of commands (as is the traditional view). In OOP, each object can receive messages, process data, and send messages to other objects. Each object can be viewed as an independent little machine with a distinct role or responsibility.
+
+terminology
+https://developer.mozilla.org/en-US/docs/Web/JavaScript/Introduction_to_Object-Oriented_JavaScript
+Prototype-based programming is an OOP model that doesn't use classes, but rather it first accomplishes the behavior of any class and then reuses it (equivalent to inheritance in class-based languages) by decorating (or expanding upon) existing prototype objects. (Also called classless, prototype-oriented, or instance-based programming.)
+
+The original (and most canonical) example of a prototype-based language is Self developed by David Ungar and Randall Smith. However, the class-less programming style grows increasingly popular lately, and has been adopted for programming languages such as JavaScript, Cecil, NewtonScript, Io, MOO, REBOL, Kevo, Squeak (when using the Viewer framework to manipulate Morphic components), and several others.1
+
+Adding images
+https://discussions.udacity.com/t/adding-sprites-to-canvas-background/28880/3
+
+
+
+Overall code from class discussions:
+// here is our base class!
+
+var Agent = function(x,y) {
+	this.x = x;
+	this.y = y;
+}
+
+Agent.prototype.render = function() {
+    ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
+};
+
+
+
+
+// Enemies our player must avoid
+var Enemy = function(x,y) {
+	this.sprite = 'images/enemy-bug.png';
+	Agent.call(x,y);
+
+    // Variables applied to each of our instances go here,
+    // we've provided one for you to get started
+
+};
+
+// Update the enemy's position, required method for game
+// Parameter: dt, a time delta between ticks
+
+/*
+ * Returns a random integer between min (inclusive) and max (inclusive)
+ * Using Math.round() will give you a non-uniform distribution!
+ */
+var enemySpeed = function getRandomInt(min, max) {
+	return Math.floor(Math.random() * (max - min + 1) * dt) + min;
+};
+
+Enemy.prototype = Object.create(Agent.prototype);
+Enemy.prototype.constructor = Enemy;
+Enemy.prototype.update = function(dt) {
+    if (this.x > 450) {
+        this.x = -50;
+        this.speed = enemySpeed;
+    }   else {
+        this.x = this.x += this.speed * dt;
+    }
+    // You should multiply any movement by the dt parameter
+    // which will ensure the game runs at the same speed for
+    // all computers.
+};
+
+var collision = function() {
+	if (Enemy.x && Enemy.y === Player.x && Player.y) {
+		init();
+	}
+};
+
+// Draw the enemy on the screen, required method for game
+Enemy.prototype.render = function() {
+    ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
+};
+
+// Now write your own player class
+// This class requires an update(), render() and
+// a handleInput() method.
+
+var Player = function(x,y) {
+	Agent.call(x,y);
+	this.sprite = 'images/char-boy.png';
+};
+
+Player.prototype = Object.create(Agent.prototype);
+Player.prototype.constructor = Player;
+Player.prototype.render = function() {
+    ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
+};
+Player.prototype.update = function() {
+
+};
+
+
+
+// Now instantiate your objects.
+// Place all enemy objects in an array called allEnemies
+// Place the player object in a variable called player
+
+var allEnemies = [];
+allEnemies.push(new Enemy(-100,200), new Enemy(300,400), new Enemy(100,200), new Enemy(400,200));
+
+
+// This listens for key presses and sends the keys to your
+// Player.handleInput() method. You don't need to modify this.
+document.addEventListener('keyup', function(e) {
+    var allowedKeys = {
+        37: 'left',
+        38: 'up',
+        39: 'right',
+        40: 'down'
+    };
+
+    player.handleInput(allowedKeys[e.keyCode]);
+});
+
+var player = new Player(202, 405, this.sprite);
+
+......
+OTHER Comments
+resources calls itself...
+
+Collision detection...
+if (this.x > enemy.x + 0
+  && this.x < enemy.x + 50
+  && this.y > enemy.y + 0
+  && this.y < enemy.y + 50) {
+    this.reset();
+}
+
