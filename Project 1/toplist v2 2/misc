@@ -1,0 +1,25 @@
+Misc…
+
+alt="Imagination and Innovation" 
+
+
+/* For devices 1px to 400px */
+@media screen and (min-width:1px) and (max-width: 400px) {
+    body {
+        background-color: red;
+    }
+}
+/* For devices 401px to 599px */
+@media screen and (min-width:401px) and (max-width: 599px) {
+    body {
+        background-color:green;
+    }
+
+}
+/* For devices  599 px and more*/
+
+@media screen and (min-width: 600px) {
+    body {
+        background-color: blue;
+    }
+}
