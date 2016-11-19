@@ -10,7 +10,7 @@ var safeCenters = [
 "lat" :39.886608, "lng": -82.921228, "website" : "turningpointdv.org", "marker" : "true"},
 
 {"name": "Star house", "type": "Information", "location": "Columbus",
-"lat" : 39.990021, "lng": -82.989634, "website" : "https://starhouse.ehe.osu.edu", "marker" : "turningpointdv"},
+"lat" : 39.990021, "lng": -82.989634, "website" : "https://starhouse.ehe.osu.edu", "marker" : "true"},
 
 {"name": "Gracehaven", "type": "Survivors", "location": "Columbus",
 "lat" :40.014993, "lng": -82.999923, "website" : "https://starhouse.ehe.osu.edu", "marker" : "true"},
@@ -32,8 +32,9 @@ city = 'Columbus';
 state = "Ohio";
 street = "High";
 query = city + ','+ state;
-query2 = "crime";
 query1 = 'sex trafficking';
+query2 = "crime";
+
 
 //this view model can be derived algorithmically from the safeCenters strucutre above.
 
@@ -48,30 +49,36 @@ var viewModel = {
 
   dataRef: function(){        // dataRefresh on submit, now the user wants more detailed info.
   sCH = viewModel.chosenItems();
-  s = sCH.length;
-
+var m = sCH.length;
 //Display safe centers on the map
 //Note handling of events and closures as indicated below.
 //Initialize content
+console.log(m,sCH);
 
- for (var i = 0; i<l; i++) {
-  markerM[i].setMap(map);}
+for (var s = 0; s<m; s++) {
+  for (var i = 0; i<l; i++){
+  if (markerM[i].title === sCH[s]) {
+   markerM[i].marker = "true";
+   attachNewContent(markerM[i]);
+  } else {markerM[i].marker = "false";}
+  }
+}
 
-for (i = 0; i<l; i++) {
-for (var j = 0; j<s; j++) {
-if (markerM[i]==sCH[j]) {
-  console.log(markerM[i]);
- attachNewContent(markerM[i]);
-} else {markerM[i].setMap(null);}
+  for (var i = 0; i<l; i++)  {
+    console.log (markerM[i].title, i, markerM[i].marker);
+    markerM[i].setMap(map);
+      if (markerM[i].marker === 'false'){
+      markerM[i].setMap(null);
+  }
 }
-}
-loadData();
-}
+
+  loadData();
+  }
 };
 
 ko.applyBindings(viewModel);
 
-
+console.log("sch", sCH);
 
 function attachNewContent(markerM){
   console.log(markerM);
@@ -171,6 +178,7 @@ $.ajax({
   method: 'GET',
   dataType: 'json',
 }).done(function(result) {
+  console.log(url);
  var articles = [];
  articles =  result.response.docs;
  for(var i in articles){
