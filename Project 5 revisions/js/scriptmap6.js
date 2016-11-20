@@ -90,6 +90,8 @@ function attachNewContent(Marker) {
   console.log("attachNewContent", Marker.title);
   Marker.setAnimation(google.maps.Animation.BOUNCE);
   Marker.addListener('click', toggleBounce) ; //addresses events and closure
+    //construct and attach the display dynamic content
+  attachContent(Marker);
   }
 
 function toggleBounce() {
@@ -98,11 +100,8 @@ function toggleBounce() {
     Marker.setAnimation(null);
   } else {
   Marker.setAnimation(google.maps.Animation.BOUNCE);
-  //construct and attach the display dynamic content
-  //attachContent(Marker);
   };
 }
-
 
 //Initialize map with markers. initMap is the callback associated with map load.
     function initMap() {
@@ -122,11 +121,10 @@ function toggleBounce() {
           }
      }
 
-
 //This ensures each event is associated with the different content window by calling a function.
   function attachContent(Marker) {
         var infowindow = new google.maps.InfoWindow({
-          content: contentString(Marker, summary)
+          content: contentString(Marker)
         });
         Marker.addListener('click', function() {  //Marker copy
         infowindow.open(Marker.get('map'), Marker);
@@ -134,23 +132,22 @@ function toggleBounce() {
     }
 
 
-function contentString (Marker, summary){
+function contentString (Marker){
             loadData();
-            summary = Marker.name;
+            var summary = Marker.name;
           //contentS[i] = '<div id="content"><h1 id="firstHeading" class="firstHeading">'+
           //safeCenters[i].name + '</h1>' +
           //'<div id="bodyContent">' + '<p>' + safeCenters[i].type + '</p>' +
           //'<h1><a href ="'+safeCenters[i].website +' " >Visit website</a></h1>' + '</p>' +
           //'</div>';
-
             return  summary;
 }
 
 
-function loadData(summary) {
+function loadData() {
 
     //var $body = $('body');
-    var summary = "number of entries";
+    var entries = "number of entries";
     var $wikiElem = $('#wikipedia-links');
     var $nytElem = $('#nytimes-articles');
     var $nsfElem = $('#nsf-links');
