@@ -11,7 +11,7 @@
 
 <body>
     <div id="header">
-        <h1>Local-Global Information for Prevention of Sex Trafficking </h1>
+        <h2>Prevention of Sex Trafficking </h2>
     </div>
 <div>
 <table>
@@ -21,7 +21,7 @@
 
 <td>
     <div id="nav">
-    <p class='italic'>Select from types of services: <strong data-bind="text:chosenItems"></strong></p>
+   <!-- <p class='italic'>Select from types of services: <strong data-bind="text:chosenItems"></strong></p> -->
     <ul data-bind = "foreach: {data: sC, as: 'C'}">
      <b data-bind = "text: C.type"></b>:
          <ul data-bind = "foreach: {data: names, as: 'name'}">
@@ -31,9 +31,9 @@
     </ul>
 
   <form id="form-container;"  class="form-container;" data-bind="submit:dataRef">
-        <button type ="submit">Display filter</button>
+        <button type ="submit">Select & click to filter local information</button>
+        <div class = "italic">Refresh browser to reset map</div>
     </form>
-
     </div>
 </td>
 

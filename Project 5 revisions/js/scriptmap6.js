@@ -1,6 +1,6 @@
 //GLOBAL VARIABLES.
 //The following is an array of safeCenters which will eventually be an API to a state server resource.
-
+//The marker attribute indicates whether the marker is visible or not.
 var safeCenters = [
 
 {"name" : "Huckleberry House", "type": "Shelter", "location": "Columbus",
@@ -30,13 +30,12 @@ var sCH = []; //safeCHosen center items
 var street, city, state, query, query1, query2 ='';
 city = 'Columbus';
 state = "Ohio";
-street = "High";
 query = city + ','+ state;
-query1 = 'sex trafficking';
+query1 = 'human trafficking';
 query2 = "crime";
 
 
-//this view model can be derived algorithmically from the safeCenters strucutre above.
+//This view model can be eventually derived algorithmically from the safeCenters strucutre above.
 
 var viewModel = {
   sC : ko.observableArray([
@@ -49,53 +48,60 @@ var viewModel = {
 
   dataRef: function(){        // dataRefresh on submit, now the user wants more detailed info.
   sCH = viewModel.chosenItems();
-var m = sCH.length;
-//Display safe centers on the map
-//Note handling of events and closures as indicated below.
-//Initialize content
-console.log(m,sCH);
+  var m = sCH.length;
 
-for (var s = 0; s<m; s++) {
-  for (var i = 0; i<l; i++){
-  if (markerM[i].title === sCH[s]) {
-   markerM[i].marker = "true";
-   attachNewContent(markerM[i]);
-  } else {markerM[i].marker = "false";}
-  }
+//Display the filteres safe centers on the map
+
+//First initialize the marker array associated with the map to false making all markes invisible.
+for (var i = 0; i<l; i++) {
+  markerM[i].marker='false';
+  markerM[i].setMap(null);
+}
+//Turn on the flags to visible to reflect filtered locations and place on map using 'setMap'
+isVisible(markerM);
+
+for (var i = 0; i<l; i++) {
+  if (markerM[i].marker == "true") {
+     markerM[i].setMap(map);
+     attachNewContent(markerM[i]); //Provides marker functionality.
+  } else {
+    markerM[i].marker = "false";
+  }; }
+
+//Function to make invisible all markers that are not in sCH
+function isVisible(marks) {
+for (var i = 0; i<l; i++) {
+  for(var s = 0; s<m; s++) {
+    if (markerM[i].title === sCH[s]){
+    markerM[i].marker = "true";
+  }; };
+}
 }
 
-  for (var i = 0; i<l; i++)  {
-    console.log (markerM[i].title, i, markerM[i].marker);
-    markerM[i].setMap(map);
-      if (markerM[i].marker === 'false'){
-      markerM[i].setMap(null);
-  }
-}
-
-  loadData();
+  //loadData();.....have moved this to implement dynamic content example
   }
 };
 
 ko.applyBindings(viewModel);
 
-console.log("sch", sCH);
+//Functions that process the marker objects relating to the map
 
-function attachNewContent(markerM){
-  console.log(markerM);
-  markerM.setAnimation(google.maps.Animation.BOUNCE);
-  markerM.addListener('click', function(){  //addresses events and closure
-  toggleBounce(markerM);
-  });
+function attachNewContent(Marker) {
+  console.log("attachNewContent", Marker.title);
+  Marker.setAnimation(google.maps.Animation.BOUNCE);
+  Marker.addListener('click', toggleBounce) ; //addresses events and closure
+  }
+
+function toggleBounce() {
+  console.log('toggleBounce', Marker.setAnimation());
+  if (Marker.setAnimation() !== null){
+    Marker.setAnimation(null);
+  } else {
+  Marker.setAnimation(google.maps.Animation.BOUNCE);
+  //construct and attach the display dynamic content
+  //attachContent(Marker);
+  };
 }
-
-
-function toggleBounce(markerM) {
-  if (markerM.getAnimation() === null) {
-   markerM.setAnimation(null); }
-   else {
-  markerM.setAnimation(google.maps.Animation.BOUNCE);
-  }
-  }
 
 
 //Initialize map with markers. initMap is the callback associated with map load.
@@ -113,41 +119,38 @@ function toggleBounce(markerM) {
             animation: google.maps.Animation.DROP,
             map: map
             });
-            attachContent(markerM[i], contentString(i));
           }
      }
 
 
 //This ensures each event is associated with the different content window by calling a function.
-  function attachContent(markerM, content) {
+  function attachContent(Marker) {
         var infowindow = new google.maps.InfoWindow({
-          content: content
+          content: contentString(Marker, summary)
         });
-
-        markerM.addListener('click', function() {  //markerM copy
-          infowindow.open(markerM.get('map'), markerM);
-
+        Marker.addListener('click', function() {  //Marker copy
+        infowindow.open(Marker.get('map'), Marker);
         });
     }
 
-       // Removes the markers from the map, but keeps them in the array.
 
+function contentString (Marker, summary){
+            loadData();
+            summary = Marker.name;
+          //contentS[i] = '<div id="content"><h1 id="firstHeading" class="firstHeading">'+
+          //safeCenters[i].name + '</h1>' +
+          //'<div id="bodyContent">' + '<p>' + safeCenters[i].type + '</p>' +
+          //'<h1><a href ="'+safeCenters[i].website +' " >Visit website</a></h1>' + '</p>' +
+          //'</div>';
 
-
-function contentString (i){
-
-          contentS[i] = '<div id="content"><h1 id="firstHeading" class="firstHeading">'+
-          safeCenters[i].name + '</h1>' +
-          '<div id="bodyContent">' + '<p>' + safeCenters[i].type + '</p>' +
-          '<h1><a href ="'+safeCenters[i].website +' " >Visit website</a></h1>' + '</p>' +
-          '</div>';
-          return  contentS[i];
+            return  summary;
 }
 
 
-function loadData() {
+function loadData(summary) {
 
     //var $body = $('body');
+    var summary = "number of entries";
     var $wikiElem = $('#wikipedia-links');
     var $nytElem = $('#nytimes-articles');
     var $nsfElem = $('#nsf-links');
@@ -159,7 +162,7 @@ function loadData() {
 
 //clear markers
 
-
+console.log('query', query);
 
     //var streetStr = $('#street').val();
     //var cityStr = $('#city').val();
@@ -167,9 +170,10 @@ function loadData() {
 
 
 // Built by NYT LucyBot. www.lucybot.com
+//Article Search API key: 020cabcb3a92b8c411f8f88110edb095:13:38869805
 var url = "https://api.nytimes.com/svc/search/v2/articlesearch.json";
 url += '?' + $.param({
-  'api-key': "c07dd24a9be14a27a450d6394973776e",
+  'api-key': "020cabcb3a92b8c411f8f88110edb095:13:38869805",
   'q': query,
   'fl': "abstract"
 });
@@ -178,21 +182,41 @@ $.ajax({
   method: 'GET',
   dataType: 'json',
 }).done(function(result) {
-  console.log(url);
  var articles = [];
  articles =  result.response.docs;
  for(var i in articles){
 if (articles[i].abstract !== null) {
   $nytElem.append('<p>' + articles[i].abstract + '</p>');  }
 }
-}).fail(function(err) {
-  throw err;
-});
+})
+.fail(function(jqXHR, exception) {
+// Our error logic here
+        var msg = '';
+        if (jqXHR.status === 0) {
+            msg = 'Not connect.\n Verify Network.';
+        } else if (jqXHR.status == 404) {
+            msg = 'Requested page not found. [404]';
+        } else if (jqXHR.status == 500) {
+            msg = 'Internal Server Error [500].';
+        } else if (exception === 'parsererror') {
+            msg = 'Requested JSON parse failed.';
+        } else if (exception === 'timeout') {
+            msg = 'Time out error.';
+        } else if (exception === 'abort') {
+            msg = 'Ajax request aborted.';
+        } else {
+            msg = 'Uncaught Error.\n' + jqXHR.responseText;
+        }
+        $nytElem.append('<p>' + msg + '<p/>');
+    })
+    //.always(function () {alert("NYT complete");})
+    ;
 
 var nsfURL = 'http://api.nsf.gov/services/v1/awards.json?keyword='+ query1;
 var nsfRequestTimeout = setTimeout(function(){
-        $nsfElem.text("failed to get nsf resources");
+        $nsfElem.text("No relevant resources");
     }, 8000);
+//console.log(nsfURL);
  $.ajax({
   url: nsfURL,
   dataType: "jsonp",
@@ -202,17 +226,19 @@ var nsfRequestTimeout = setTimeout(function(){
     for (var i in awardList.response.award) {
       if(awardList.response.award[i].awardeeCity == city){
         $nsfElem.append('<li>' + awardList.response.award[i].title + '</li>');}
-    }
-    clearTimeout(nsfRequestTimeout);
+    };
   }
+    //error: function (jqXHR, textStatus, errorThrown){
+    //alert('request failed');
+  //clearTimeout(nsfRequestTimeout);
 });
 
 //Retrive relevant info from wikipedia.
    var wikiURL='https://en.wikipedia.org/w/api.php?action=opensearch&search=' + query1 + '&format=json';
     var wikiRequestTimeout = setTimeout(function(){
-        $wikiElem.text("failed to get wikipedia resources");
+        $wikiElem.text("No relevant wikipedia resources");
     }, 8000);
-
+//console.log(wikiURL);
     $.ajax({
         url: wikiURL,
         dataType:"jsonp",
@@ -223,11 +249,11 @@ var nsfRequestTimeout = setTimeout(function(){
             for (var i = 0; i < articleList.length; i++) {
             articleStr = articleList[i];
             var url = 'http://en.wikipedia.org/wiki/' + articleStr;
-            $wikiElem.append('<li><a href="' + url + '">' + articleStr + '</a></li>');
-            }
+            $wikiElem.append('<li><a href="' + url + '">' + articleStr + '</a></li>');}
+     //   error: function(xhr, textStatus, errorThrown){
+     //     alert('request failed');
             clearTimeout(wikiRequestTimeout);
-            }
-        });
-
+          }
+            });
  return false;
 }
