@@ -27,12 +27,7 @@ var l = safeCenters.length;
 var sCH = []; //safeCHosen center items
 //Viewmodel is the data manipulated from the user interface.
 //sC is a user interface view of the safeCenters above...can be combined, how in Knockoutjs?
-var street, city, state, query, query1, query2 ='';
-city = 'Columbus';
-state = "Ohio";
-query = city + ','+ state;
-query1 = 'human trafficking';
-query2 = "crime";
+
 
 
 //This view model can be eventually derived algorithmically from the safeCenters strucutre above.
@@ -123,31 +118,42 @@ function toggleBounce() {
 
 //This ensures each event is associated with the different content window by calling a function.
   function attachContent(Marker) {
-        var infowindow = new google.maps.InfoWindow({
+
+          var infowindow = new google.maps.InfoWindow({
           content: contentString(Marker)
         });
+        console.log("attachContent", Marker, infowindow.content);
         Marker.addListener('click', function() {  //Marker copy
         infowindow.open(Marker.get('map'), Marker);
         });
     }
 
 
-function contentString (Marker){
-            loadData();
-            var summary = Marker.name;
-          //contentS[i] = '<div id="content"><h1 id="firstHeading" class="firstHeading">'+
-          //safeCenters[i].name + '</h1>' +
-          //'<div id="bodyContent">' + '<p>' + safeCenters[i].type + '</p>' +
-          //'<h1><a href ="'+safeCenters[i].website +' " >Visit website</a></h1>' + '</p>' +
-          //'</div>';
-            return  summary;
+function contentString(Marker){
+console.log("contentString", Marker, safeCenters[0].name);
+        var i = safeCenters.indexOf(Marker.title);
+          summary = '<div id="content"><h1 id="firstHeading" class="firstHeading">'+
+          safeCenters[i].name + '</h1>' +
+          '<div id="bodyContent">' + '<p>' + safeCenters[i].type + '</p>' +
+          '<h1><a href ="'+safeCenters[i].website +' " >Visit website</a></h1>' + '</p>' +
+          loadData();
+          '</div>';
+          return  summary
 }
 
 
 function loadData() {
 
+  var street, city, state, query, query1, query2 ='';
+        city = 'Columbus';
+        state = "Ohio";
+        query = city + ','+ state;
+        query1 = 'human trafficking';
+        query2 = "crime";
+
     //var $body = $('body');
-    var entries = "number of entries";
+    var respSummary = "Summary:";
+
     var $wikiElem = $('#wikipedia-links');
     var $nytElem = $('#nytimes-articles');
     var $nsfElem = $('#nsf-links');
@@ -177,16 +183,17 @@ url += '?' + $.param({
 $.ajax({
   url: url,
   method: 'GET',
-  dataType: 'json',
+  dataType: 'jsonp',
 }).done(function(result) {
  var articles = [];
  articles =  result.response.docs;
  for(var i in articles){
 if (articles[i].abstract !== null) {
-  $nytElem.append('<p>' + articles[i].abstract + '</p>');  }
+  $nytElem.append('<p>' + articles[i].abstract + '</p>');
 }
-})
-.fail(function(jqXHR, exception) {
+respSummary = respSummary + " " + "NYTimes - " + articles.length;
+}
+}).fail(function(jqXHR, exception) {
 // Our error logic here
         var msg = '';
         if (jqXHR.status === 0) {
@@ -205,9 +212,9 @@ if (articles[i].abstract !== null) {
             msg = 'Uncaught Error.\n' + jqXHR.responseText;
         }
         $nytElem.append('<p>' + msg + '<p/>');
-    })
+    }) ;
     //.always(function () {alert("NYT complete");})
-    ;
+
 
 var nsfURL = 'http://api.nsf.gov/services/v1/awards.json?keyword='+ query1;
 var nsfRequestTimeout = setTimeout(function(){
@@ -218,17 +225,35 @@ var nsfRequestTimeout = setTimeout(function(){
   url: nsfURL,
   dataType: "jsonp",
   jsonp: "callback",
-  success: function (response) {
+  }).done(function (response) {
     var awardList = response;
     for (var i in awardList.response.award) {
       if(awardList.response.award[i].awardeeCity == city){
-        $nsfElem.append('<li>' + awardList.response.award[i].title + '</li>');}
-    };
-  }
-    //error: function (jqXHR, textStatus, errorThrown){
-    //alert('request failed');
-  //clearTimeout(nsfRequestTimeout);
-});
+        $nsfElem.append('<li>' + awardList.response.award[i].title + '</li>');
+      };}
+    respSummary = respSummary + ", NSF - " + articles.length;
+    console.log(respSummary);
+    }).fail(function(jqXHR, exception) {
+// Our error logic here
+        var msg = '';
+        if (jqXHR.status === 0) {
+            msg = 'Not connect.\n Verify Network.';
+        } else if (jqXHR.status == 404) {
+            msg = 'Requested page not found. [404]';
+        } else if (jqXHR.status == 500) {
+            msg = 'Internal Server Error [500].';
+        } else if (exception === 'parsererror') {
+            msg = 'Requested JSON parse failed.';
+        } else if (exception === 'timeout') {
+            msg = 'Time out error.';
+        } else if (exception === 'abort') {
+            msg = 'Ajax request aborted.';
+        } else {
+            msg = 'Uncaught Error.\n' + jqXHR.responseText;
+        }
+        $nytElem.append('<p>' + msg + '<p/>');
+    }) ;
+    clearTimeout(nsfRequestTimeout);
 
 //Retrive relevant info from wikipedia.
    var wikiURL='https://en.wikipedia.org/w/api.php?action=opensearch&search=' + query1 + '&format=json';
@@ -240,17 +265,37 @@ var nsfRequestTimeout = setTimeout(function(){
         url: wikiURL,
         dataType:"jsonp",
         jsonp: "callback",
-        success: function(response) {
+        }).done(function(response) {
             var articleList = response[1];
             var articleStr = '';
             for (var i = 0; i < articleList.length; i++) {
             articleStr = articleList[i];
             var url = 'http://en.wikipedia.org/wiki/' + articleStr;
-            $wikiElem.append('<li><a href="' + url + '">' + articleStr + '</a></li>');}
-     //   error: function(xhr, textStatus, errorThrown){
-     //     alert('request failed');
-            clearTimeout(wikiRequestTimeout);
-          }
-            });
- return false;
+            $wikiElem.append('<li><a href="' + url + '">' + articleStr + '</a></li>');};
+            respSummary = respSummary + ", Wiki - " + articleList.length;
+            console.log(respSummary, "respSummary");
+      }).fail(function(jqXHR, exception) {
+// Our error logic here
+        var msg = '';
+        if (jqXHR.status === 0) {
+            msg = 'Not connect.\n Verify Network.';
+        } else if (jqXHR.status == 404) {
+            msg = 'Requested page not found. [404]';
+        } else if (jqXHR.status == 500) {
+            msg = 'Internal Server Error [500].';
+        } else if (exception === 'parsererror') {
+            msg = 'Requested JSON parse failed.';
+        } else if (exception === 'timeout') {
+            msg = 'Time out error.';
+        } else if (exception === 'abort') {
+            msg = 'Ajax request aborted.';
+        } else {
+            msg = 'Uncaught Error.\n' + jqXHR.responseText;
+        }
+        $wikiElem.append('<p>' + msg + '<p/>');
+      });
+      clearTimeout(wikiRequestTimeout);
+
+
+ return respSummary; //false;
 }
