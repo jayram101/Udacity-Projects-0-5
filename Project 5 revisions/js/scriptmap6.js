@@ -9,7 +9,7 @@ var safeCenters = [
 {"name" : "Turning point", "type": "Survivors", "location": "Columbus",
 "lat" :39.886608, "lng": -82.921228, "website" : "turningpointdv.org", "marker" : "true"},
 
-{"name": "Star house", "type": "Information", "location": "Columbus",
+{"name": "Star house", "type": "Resources", "location": "Columbus",
 "lat" : 39.990021, "lng": -82.989634, "website" : "https://starhouse.ehe.osu.edu", "marker" : "true"},
 
 {"name": "Gracehaven", "type": "Survivors", "location": "Columbus",
@@ -23,6 +23,7 @@ var map;
 var markerM = []; //array of map markers
 var contentS = []; //info content displayed for a marker
 var l = safeCenters.length;
+var respSummary = 'none';
 //var currentLocation = {"lat" : 39.98, "lng": -83.0};
 var sCH = []; //safeCHosen center items
 //Viewmodel is the data manipulated from the user interface.
@@ -36,7 +37,7 @@ var viewModel = {
   sC : ko.observableArray([
 {"type": "Shelter", names : ["Huckleberry House"]},
 {"type": "Survivors", names : ["Turning point", "Gracehaven"]},
-{"type": "Information", names: ["Star house"]},
+{"type": "Resources", names: ["Star house"]},
 {"type": "Collaboration", names: ["Hands On Ohio"]}
 ]),
   chosenItems: ko.observableArray(),
@@ -57,7 +58,7 @@ isVisible(markerM);
 
 for (var i = 0; i<l; i++) {
   if (markerM[i].marker == "true") {
-     markerM[i].setMap(map);
+     markerM[i].setMap(map); //Put the Marker back on the map
      attachNewContent(markerM[i]); //Provides marker functionality.
   } else {
     markerM[i].marker = "false";
@@ -72,8 +73,7 @@ for (var i = 0; i<l; i++) {
   }; };
 }
 }
-
-  //loadData();.....have moved this to implement dynamic content example
+  loadData();
   }
 };
 
@@ -82,7 +82,7 @@ ko.applyBindings(viewModel);
 //Functions that process the marker objects relating to the map
 
 function attachNewContent(Marker) {
-  console.log("attachNewContent", Marker.title);
+  console.log("attachNewContent", Marker.title, sCH);
   Marker.setAnimation(google.maps.Animation.BOUNCE);
   Marker.addListener('click', toggleBounce) ; //addresses events and closure
     //construct and attach the display dynamic content
@@ -99,11 +99,11 @@ function toggleBounce() {
 }
 
 //Initialize map with markers. initMap is the callback associated with map load.
-    function initMap() {
+  function initMap() {
       //center the map
-        map = new google.maps.Map(document.getElementById('map'), {
-          zoom: 11,
-          center: {lat: 39.98, lng: -83.0}
+    map = new google.maps.Map(document.getElementById('map'), {
+      zoom: 11,
+      center: {lat: 39.98, lng: -83.0}
         });
 
           for (var i = 0; i < l; i++) {
@@ -116,42 +116,44 @@ function toggleBounce() {
           }
      }
 
+
 //This ensures each event is associated with the different content window by calling a function.
   function attachContent(Marker) {
+  var i,j; //find the safeCenters object that matches the Marker
+  for (j = 0; j < safeCenters.length; j++) {
+    if (safeCenters[j].name === Marker.title) {
+    i=j;};
+    };
+        //Type = safeCenters[j].type;
+        //console.log('Type', j, Type);
+  //console.log("attachContent", Marker.title, i);
+     //var i = safeCenters.indexOf(Marker.title);
 
-          var infowindow = new google.maps.InfoWindow({
-          content: contentString(Marker)
-        });
-        console.log("attachContent", Marker, infowindow.content);
+
+        contentS[i] = '<div id="content"><h1 id="firstHeading" class="firstHeading">'+
+        safeCenters[i].name + '</h1>' +
+        '<div id="bodyContent">' + '<p>' + safeCenters[i].type + '</p>' +
+        '<h1><a href ="'+safeCenters[i].website +' " >Visit website</a></h1>' + '</p>' +
+        '<p>' + respSummary + '</p>'
+        '</div>';
+
+        var infowindow = new google.maps.InfoWindow({
+          content: contentS[i]
+          });
         Marker.addListener('click', function() {  //Marker copy
         infowindow.open(Marker.get('map'), Marker);
         });
+        console.log("attachContent", infowindow.content);
     }
 
 
-function contentString(Marker){
-console.log("contentString", Marker, safeCenters[0].name);
-        var i = safeCenters.indexOf(Marker.title);
-          summary = '<div id="content"><h1 id="firstHeading" class="firstHeading">'+
-          safeCenters[i].name + '</h1>' +
-          '<div id="bodyContent">' + '<p>' + safeCenters[i].type + '</p>' +
-          '<h1><a href ="'+safeCenters[i].website +' " >Visit website</a></h1>' + '</p>' +
-          loadData();
-          '</div>';
-          return  summary
-}
-
 
 function loadData() {
+  var street, city, state, query, query1 = '';
+      city = 'Columbus';
+      state = "OH";
 
-  var street, city, state, query, query1, query2 ='';
-        city = 'Columbus';
-        state = "Ohio";
-        query = city + ','+ state;
-        query1 = 'human trafficking';
-        query2 = "crime";
-
-    //var $body = $('body');
+    var $body = $('body');
     var respSummary = "Summary:";
 
     var $wikiElem = $('#wikipedia-links');
@@ -165,18 +167,19 @@ function loadData() {
 
 //clear markers
 
-console.log('query', query);
+//console.log('Type', Type);
 
     //var streetStr = $('#street').val();
     //var cityStr = $('#city').val();
     //var address = query;
 
-
+//If (Type == "Collaboration")
+query = 'columbus,ohio,shelter,collaboration';
 // Built by NYT LucyBot. www.lucybot.com
 //Article Search API key: 020cabcb3a92b8c411f8f88110edb095:13:38869805
 var url = "https://api.nytimes.com/svc/search/v2/articlesearch.json";
 url += '?' + $.param({
-  'api-key': "020cabcb3a92b8c411f8f88110edb095:13:38869805",
+   'api-key': "020cabcb3a92b8c411f8f88110edb095:13:38869805",
   'q': query,
   'fl': "abstract"
 });
@@ -191,11 +194,11 @@ $.ajax({
 if (articles[i].abstract !== null) {
   $nytElem.append('<p>' + articles[i].abstract + '</p>');
 }
-respSummary = respSummary + " " + "NYTimes - " + articles.length;
+respSummary = respSummary + " " + "NYTimes: " + articles.length;
 }
 }).fail(function(jqXHR, exception) {
 // Our error logic here
-        var msg = '';
+        var msg = 'err';
         if (jqXHR.status === 0) {
             msg = 'Not connect.\n Verify Network.';
         } else if (jqXHR.status == 404) {
@@ -216,6 +219,9 @@ respSummary = respSummary + " " + "NYTimes - " + articles.length;
     //.always(function () {alert("NYT complete");})
 
 
+//If (Type === "Resources" || Type === "Collaboration")
+query1 = "human trafficking";
+
 var nsfURL = 'http://api.nsf.gov/services/v1/awards.json?keyword='+ query1;
 var nsfRequestTimeout = setTimeout(function(){
         $nsfElem.text("No relevant resources");
@@ -227,11 +233,14 @@ var nsfRequestTimeout = setTimeout(function(){
   jsonp: "callback",
   }).done(function (response) {
     var awardList = response;
+    var number = 0;
     for (var i in awardList.response.award) {
-      if(awardList.response.award[i].awardeeCity == city){
+      if(awardList.response.award[i].awardeeStateCode  == state){
         $nsfElem.append('<li>' + awardList.response.award[i].title + '</li>');
-      };}
-    respSummary = respSummary + ", NSF - " + articles.length;
+       number = number+1;
+     };
+    }
+    respSummary = respSummary + ", NSF: " + number;
     console.log(respSummary);
     }).fail(function(jqXHR, exception) {
 // Our error logic here
@@ -255,6 +264,7 @@ var nsfRequestTimeout = setTimeout(function(){
     }) ;
     clearTimeout(nsfRequestTimeout);
 
+
 //Retrive relevant info from wikipedia.
    var wikiURL='https://en.wikipedia.org/w/api.php?action=opensearch&search=' + query1 + '&format=json';
     var wikiRequestTimeout = setTimeout(function(){
@@ -272,7 +282,7 @@ var nsfRequestTimeout = setTimeout(function(){
             articleStr = articleList[i];
             var url = 'http://en.wikipedia.org/wiki/' + articleStr;
             $wikiElem.append('<li><a href="' + url + '">' + articleStr + '</a></li>');};
-            respSummary = respSummary + ", Wiki - " + articleList.length;
+            respSummary = respSummary + ", Wiki: " + articleList.length;
             console.log(respSummary, "respSummary");
       }).fail(function(jqXHR, exception) {
 // Our error logic here
@@ -294,8 +304,12 @@ var nsfRequestTimeout = setTimeout(function(){
         }
         $wikiElem.append('<p>' + msg + '<p/>');
       });
+
       clearTimeout(wikiRequestTimeout);
 
 
- return respSummary; //false;
+
+ return respSummary;//false;
 }
+
+
