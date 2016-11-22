@@ -65,10 +65,10 @@ var sCH = []; //safeCHosen center items
 //sC is a user interface view of the safeCenters above...can be combined, how in Knockoutjs?
 
 
-
 //This view model can be eventually derived algorithmically from the safeCenters strucutre above.
 
-var viewModel = {
+
+ var viewModel = {
     sC: ko.observableArray([{
         type: "Shelter",
         names: ["Huckleberry House"]
@@ -84,8 +84,23 @@ var viewModel = {
     }]),
     chosenItems: ko.observableArray(),
 
+    InputValue: ko.observable(''),
 
-  dataRef: function() { // dataRefresh on submit, now the user wants more detailed info.
+  search: function(value) {
+    // remove all the current elements, which removes them from the view
+    viewModel.sC.removeAll();
+
+    for(var x in sC) {
+        for (y in  sC[x].names[y]){
+      if(sC[x].names[y].toLowerCase().indexOf(value.toLowerCase()) >= 0) {
+       viewModel.sC.push(sC[x].name[y]);
+      }
+    }
+  }
+},
+
+
+dataRef: function() { // dataRefresh on submit, now the user wants more detailed info.
         sCH = viewModel.chosenItems();
         var m = sCH.length;
 
@@ -120,9 +135,11 @@ var viewModel = {
         }
         //loadData();
     },
+
 };
 
 ko.applyBindings(viewModel);
+viewModel.InputValue.subscribe(viewModel.search);
 
 //Functions that process the marker objects relating to the map
 
