@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="css/style.css">
     <script src="js/libs/jquery.min.js"></script>
     <script src="js/libs/knockout-3.4.0.js"></script>
+
 </head>
 
 <body>
@@ -41,7 +42,10 @@
 
 <td>
     <div id="nav">
-
+<form>
+  <input type="search" name="search" placeholder='Search by name...' data-bind = 'value:InputValue, valueUpdate:"keyup"' autocomplete="off">
+</form>
+<div>
     <ul data-bind = "foreach: {data: sC, as: 'C'}">
      <b data-bind = "text: C.type"></b>:
          <ul data-bind = "foreach: {data: names, as: 'name'}">
