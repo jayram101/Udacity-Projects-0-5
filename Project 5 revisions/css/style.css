@@ -16,11 +16,10 @@ height : 455px;
 width : 300px;
 text-align : left;
 border-style : solid;
-border-color : brown;
+border-color : black;
 border-width : 10px;
 padding : 15px;
 margin-left : 10px;
-border-radius : 18%;
 }
 #map {
 width : 500px;
@@ -43,35 +42,32 @@ border-radius : 50%;
 }
 .nytimes-container {
 font-size : small;
-width : 375px;
+width : 300px;
 float : left;
 padding : 25px;
 border-style : solid;
 border-width : 1px;
 border-color : rgb(0, 102, 34);
-border-radius : 18%;
 margin : 20px;
 background-color : rgba(255, 255, 255, 0.7);
 }
 .wikipedia-container {
-width : 375px;
+width : 300px;
 float : left;
 padding : 20px;
 border-style : solid;
 border-width : 1px;
 border-color : rgb(0, 102, 34);
-border-radius : 18%;
 margin : 20px;
 background-color : rgba(255, 255, 255, 0.7);
 }
 .nsf-container {
-width : 375px;
+width : 300px;
 float : left;
 padding : 25px;
 border-style : solid;
 border-width : 1px;
 border-color : rgb(0, 102, 34);
-border-radius : 18%;
 margin : 20px;
 background-color : rgba(255, 255, 255, 0.7);
 }
