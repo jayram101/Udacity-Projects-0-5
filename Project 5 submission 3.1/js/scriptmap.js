@@ -45,7 +45,7 @@ function initMap() {
         self.searchInput = ko.observable(''); //result of the search input
         self.safeCenters = ko.observableArray(safeCenters); //all the centers
         self.safeChosen = ko.observableArray();  //these are checked items
-        self.contentTitles = ko.observableArray();
+       // self.contentTitles = ko.observableArray();
         self.contents = ko.observableArray();
 
 
@@ -108,14 +108,21 @@ function populateInfoWindow(marker, infoWindow) {
     if (infoWindow.marker != marker) {
         infoWindow.marker = marker;
 
-        infoWindow.setContent('<div>' + marker.title + '</div>');
+        infoWindow.setContent('<div>' + marker.title +  ', see below for more' + '</div>');
         infoWindow.open(map, marker);
         infoWindow.marker.setAnimation(google.maps.Animation.BOUNCE);
         infoWindow.addListener('closeclick', function(){
         infoWindow.marker = null;
         marker.setAnimation(null);
         });
+        stopAnimation(marker);
     }
+}
+
+function stopAnimation(marker) {
+    setTimeout(function () {
+        marker.setAnimation(null);
+    }, 2000);
 }
 
 function fullyPopulateMap () {
@@ -137,7 +144,7 @@ function fullyPopulateMap () {
     markerM.push(marker);
 
     marker.addListener("click", function(){
-       loadData(type);
+        loadData(type);
         populateInfoWindow(this, largeInfoWindow);
     });
 
@@ -156,7 +163,7 @@ self.safeCenters().forEach(function(center){
     var title = center.name;
     var nameToSearch =  center.name.toLowerCase();
     var searchQueryLower = searchQuery.toLowerCase();
-    var position = center.postion;
+    var position = center.position;
     var type = center.type;
 
         if (nameToSearch.indexOf(searchQueryLower) !== -1) {
@@ -164,7 +171,7 @@ self.safeCenters().forEach(function(center){
           //console.log("populateFileredMap creating marker", searchQueryLower);
           var marker = new google.maps.Marker({
             map: map,
-            position: position,
+            position: center.position,
             title: title,
             animation: google.maps.Animation.DROP,
             id: center
@@ -205,22 +212,72 @@ self.safeCenters().forEach(function(center){
 }
 
 
-//Load data assembles the new content from sources base on tthe type passed.
+//Load data assembles the new content from information sources (e.g. NYT) based on the type passed.
 //However, these sources do not fully support queries based on type. The dynamic content is respSummary.
 
 function loadData(type) {
 
-    var articleList = self.contents;
-
-
 //Form queries that are acceptable to different external sources based on user selected 'type'
-    var query = 'human trafficking' + ' ' + this.type;
+    var query = 'human trafficking' + ' ' + type;
     var city = 'Columbus';
     var state = "OH";
-    //console.log("loadData", this.type, query, state); // am not able to get this to work thus have hardwired query parameters.
 
-  //Local research related to human trafficking; parameters are OH
-    self.contents.push('<h4>' + "Further information:" + '</h4>');
+
+    self.contents.push('<h3> More on ' + type + '</h3>');
+
+    console.log("In loadData", type, query, city, state); // am not able to get this to work thus have hardwired query parameters.
+// Built by NYT LucyBot. www.lucybot.com
+    //Article Search API key: 020cabcb3a92b8c411f8f88110edb095:13:38869805
+
+    var nytRequestTimeout = setTimeout(function() {
+        $nsfElem.text("No relevant resources");
+    }, 8000);
+
+    var url = "https://api.nytimes.com/svc/search/v2/articlesearch.json";
+    url += '?' + $.param({
+        'api-key': "020cabcb3a92b8c411f8f88110edb095:13:38869805",
+        'q': 'human trafficking ohio',
+        'fl': "abstract"
+    });
+
+    $.ajax({
+        url: url,
+        method: 'GET'
+    }).done(function(result) {
+        var articles = [];
+        var length = 0;
+        articles = result.response.docs;
+
+        for (var i in articles) {
+            if (articles[i].abstract !== null) {
+            self.contents.push('<p>NYT: ' + articles[i].abstract + '</p>');
+            }
+        }
+        //console.log("nyt", self.contents());
+    }).fail(function(jqXHR, exception) {
+        // Our error logic here
+        var msg = 'err';
+        if (jqXHR.status === 0) {
+            msg = 'Not connect.\n Verify Network.';
+        } else if (jqXHR.status == 404) {
+            msg = 'Requested page not found. [404]';
+        } else if (jqXHR.status == 500) {
+            msg = 'Internal Server Error [500].';
+        } else if (exception === 'parsererror') {
+            msg = 'Requested JSON parse failed.';
+        } else if (exception === 'timeout') {
+            msg = 'Time out error.';
+        } else if (exception === 'abort') {
+            msg = 'Ajax request aborted.';
+        } else {
+            msg = 'Uncaught Error.\n' + jqXHR.responseText;
+        }
+    });
+
+    clearTimeout(nytRequestTimeout);
+
+  //Globl research related to human trafficking; local parameters are OH
+
     var nsfURL = 'http://api.nsf.gov/services/v1/awards.json?keyword=' + 'human trafficking' ;
     var nsfRequestTimeout = setTimeout(function() {
         $nsfElem.text("No relevant resources");
@@ -300,62 +357,11 @@ function loadData(type) {
        self.contents.push('<p>' + msg + '<p/>');
     });
     clearTimeout(wikiRequestTimeout);
+
+
+
 };
-
-    // Built by NYT LucyBot. www.lucybot.com
-    //Article Search API key: 020cabcb3a92b8c411f8f88110edb095:13:38869805
-
-    self.contents.push('<h4>' + "New York Times:" + '</h4>');
-
-    var nytRequestTimeout = setTimeout(function() {
-        $nsfElem.text("No relevant resources");
-    }, 8000);
-
-    var url = "https://api.nytimes.com/svc/search/v2/articlesearch.json";
-    url += '?' + $.param({
-        'api-key': "020cabcb3a92b8c411f8f88110edb095:13:38869805",
-        'q': 'human trafficking ohio',
-        'fl': "abstract"
-    });
-
-    $.ajax({
-        url: url,
-        method: 'GET'
-    }).done(function(result) {
-        var articles = [];
-        var length = 0;
-        articles = result.response.docs;
-
-        for (var i in articles) {
-            if (articles[i].abstract !== null) {
-            self.contents.push('<p>' + articles[i].abstract + '</p>');
-            }
-        }
-        //console.log("nyt", self.contents());
-    }).fail(function(jqXHR, exception) {
-        // Our error logic here
-        var msg = 'err';
-        if (jqXHR.status === 0) {
-            msg = 'Not connect.\n Verify Network.';
-        } else if (jqXHR.status == 404) {
-            msg = 'Requested page not found. [404]';
-        } else if (jqXHR.status == 500) {
-            msg = 'Internal Server Error [500].';
-        } else if (exception === 'parsererror') {
-            msg = 'Requested JSON parse failed.';
-        } else if (exception === 'timeout') {
-            msg = 'Time out error.';
-        } else if (exception === 'abort') {
-            msg = 'Ajax request aborted.';
-        } else {
-            msg = 'Uncaught Error.\n' + jqXHR.responseText;
-        }
-    });
-
-    clearTimeout(nytRequestTimeout);
-};
-
-
+}
 var mapsError = function() {
 alert("Google Maps failed to load");
 }
