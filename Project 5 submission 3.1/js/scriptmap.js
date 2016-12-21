@@ -1,6 +1,6 @@
 
 //I have used example in github https://github.com/laurendev/Neighborhood-Map-Project/blob/master/js/script.js to completely restucture original submissions!!
-//The model-view-view model paradigm is followed here to the fullest....
+//The code has been refactored to the model-view-view model paradigm, to the fullest....
 
 //Model
 
@@ -40,43 +40,42 @@ function initMap() {
 
 //Define the model as observables and methods.
    var ViewModel = function() {
-    var self = this;
+        var self = this;
 
         self.searchInput = ko.observable(''); //result of the search input
         self.safeCenters = ko.observableArray(safeCenters); //all the centers
         self.safeChosen = ko.observableArray();  //these are checked items
-       // self.contentTitles = ko.observableArray();
-        self.contents = ko.observableArray();
+        self.contents = ko.observableArray(); //addtl contents related to selected items
 
-
-     var largeInfoWindow = new google.maps.InfoWindow();
+        var largeInfoWindow = new google.maps.InfoWindow();
 
 // searchInput to console
-    self.writeToConsole = ko.computed(function(){
-        console.log("searchInput",self.searchInput());
-    });
+        self.writeToConsole = ko.computed(function(){
+            console.log("searchInput",self.searchInput());
+        });
 
-//Populates the map with all or filtered markers.
-    self.populateMap = ko.computed(function() {
-       var searchQuery = self.searchInput().toLowerCase();
-        if (!searchQuery) {
+//Populates the map with all markers or just filtered markers.
+        self.populateMap = ko.computed(function() {
+        var searchQuery = self.searchInput().toLowerCase();
+            if (!searchQuery) {
             return fullyPopulateMap();
-        } else {
-            console.log ("attempt to repopulate map");
+            } else {
+            //console.log ("attempt to repopulate map");
             deleteMarkers();
             populateFilteredMap(searchQuery);
-        }
-    });
+             };
+        });
 
     // Manages the list of current locations on the map
-    self.selectCenters = ko.computed (function() {
+
+        self.selectCenters = ko.computed (function() {
         var searchQuery = self.searchInput().toLowerCase();
 
-        if (!searchQuery) {
+            if (!searchQuery) {
             //console.log('selectCenters all centers', self.safeCenters());
 
             return self.safeCenters(); //displays all centers
-        } else {
+            } else {
             //console.log ('selectCenters reached else based on search input');
             self.safeChosen([]);  //sets all previous safeChosen to null!!
             self.safeCenters().forEach(function(center) {
@@ -85,21 +84,21 @@ function initMap() {
                 self.safeChosen.push(center);
                 //console.log("safe chosen", center);
             }
-        })
-        return self.safeChosen();
-        }
-    });
+            })
+            return self.safeChosen();
+            }
+        });
 
     //Handles opening a marker when list item is clicked
-    self.listItemClicked = function(data){
+        self.listItemClicked = function(data){
         //console.log("listItemClicked", data.type, data.marker);
-        populateInfoWindow(data.marker, largeInfoWindow);
-        loadData(data.type);
-    };
+            populateInfoWindow(data.marker, largeInfoWindow);
+            loadData(data.type); //loads additional content from external sources
+        };
 
-    self.selectContent = ko.computed(function(){
-    return self.contents();
-    });
+        self.selectContent = ko.computed(function(){
+            return self.contents();
+        });
 
 //Adds content to info window when marker is clicked.
 //Only one info window can be open at any time.
@@ -144,8 +143,8 @@ function fullyPopulateMap () {
     markerM.push(marker);
 
     marker.addListener("click", function(){
-        loadData(type);
         populateInfoWindow(this, largeInfoWindow);
+        loadData(type);
     });
 
     center.marker = marker; //re-assign newly constructed marker
@@ -180,14 +179,15 @@ self.safeCenters().forEach(function(center){
         markerM.push(marker);
 
         marker.addListener('click', function(){
-        loadData(type);
         populateInfoWindow(this, largeInfoWindow);
+        loadData(type);
         });
         center.marker = marker;
       }
     });
-    console.log('Putting searchInput markers on map', markerM );
+    //console.log('Putting searchInput markers on map', markerM );
     showMarkers();
+
 }
 
 
@@ -218,17 +218,18 @@ self.safeCenters().forEach(function(center){
 function loadData(type) {
 
 //Form queries that are acceptable to different external sources based on user selected 'type'
-    var query = 'human trafficking' + ' ' + type;
-    var city = 'Columbus';
-    var state = "OH";
+var query = 'human trafficking' + ' ' + type;
+var city = 'Columbus';
+var state = "OH";
 
+    $(".contents").empty(); //empty out previous contents
 
     self.contents.push('<h3> More on ' + type + '</h3>');
 
-    console.log("In loadData", type, query, city, state); // am not able to get this to work thus have hardwired query parameters.
+    //console.log("In loadData", type, query, city, state); // am not able to get this to work thus have hardwired query parameters.
+
 // Built by NYT LucyBot. www.lucybot.com
     //Article Search API key: 020cabcb3a92b8c411f8f88110edb095:13:38869805
-
     var nytRequestTimeout = setTimeout(function() {
         $nsfElem.text("No relevant resources");
     }, 8000);
