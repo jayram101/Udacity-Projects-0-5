@@ -1,0 +1,37 @@
+{
+  "name": "j-frontend-mobile-modified",
+  "version": "1.0.0",
+  "description": "Project 6",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jayram101/j-frontend-mobile-modified.git"
+  },
+  "author": "Jay Ramanathan",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jayram101/j-frontend-mobile-modified/issues"
+  },
+  "homepage": "https://github.com/jayram101/j-frontend-mobile-modified#readme",
+  "devDependencies": {
+    "grunt": "^1.0.1",
+    "grunt-cleanempty": "^1.0.4",
+    "grunt-contrib-clean": "^1.0.0",
+    "grunt-contrib-concat": "^1.0.1",
+    "grunt-contrib-copy": "^1.0.0",
+    "grunt-contrib-cssmin": "^1.0.2",
+    "grunt-contrib-imagemin": "^1.0.1",
+    "grunt-contrib-jshint": "^1.1.0",
+    "grunt-contrib-qunit": "^1.2.0",
+    "grunt-contrib-uglify": "^2.0.0",
+    "grunt-contrib-watch": "^1.0.0",
+    "grunt-critical": "^0.2.2"
+  },
+  "dependencies": {
+    "jpegtran": "^1.0.4",
+    "optipng-bin": "^3.1.2"
+  }
+}
