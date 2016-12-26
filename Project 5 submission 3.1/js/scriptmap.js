@@ -5,6 +5,7 @@
 //Model
 
 var map;
+var columbus = {lat: 39.98, lng: -83.0};
 var markerM = []; //array of map markers
 
 var safeCenters = [
@@ -31,9 +32,20 @@ function initMap() {
     //center the map
     map = new google.maps.Map(document.getElementById('map'), {
         zoom: 11,
-        center: {lat: 39.98, lng: -83.0},
-        mapTypeId: 'roadmap'
+        center: columbus,
+        //mapTypeId: 'roadmap'
     });
+// added - question how can I replace a 'balloon' by a 'human'
+    var panorama = new google.maps.StreetViewPanorama(
+      document.getElementById('pano'), {
+        position: columbus,
+        pov: {
+          heading: 34,
+          pitch: 10
+        }
+    });
+
+    map.setStreetView(panorama);
 
     ko.applyBindings(new ViewModel()); //initializes the model along with the map
 }
@@ -60,31 +72,31 @@ function initMap() {
             if (!searchQuery) {
             return fullyPopulateMap();
             } else {
-            //console.log ("attempt to repopulate map");
-            deleteMarkers();
-            populateFilteredMap(searchQuery);
-             };
+                //console.log ("attempt to repopulate map");
+                deleteMarkers();
+                populateFilteredMap(searchQuery);
+            };
         });
 
     // Manages the list of current locations on the map
+    //Question is the following format what we are looking for?
 
         self.selectCenters = ko.computed (function() {
         var searchQuery = self.searchInput().toLowerCase();
 
             if (!searchQuery) {
             //console.log('selectCenters all centers', self.safeCenters());
-
             return self.safeCenters(); //displays all centers
             } else {
             //console.log ('selectCenters reached else based on search input');
-            self.safeChosen([]);  //sets all previous safeChosen to null!!
-            self.safeCenters().forEach(function(center) {
-            var name = center.name.toLowerCase();
-            if (name.indexOf(searchQuery) !== -1 ) {
-                self.safeChosen.push(center);
-                //console.log("safe chosen", center);
-            }
-            })
+                self.safeChosen([]);  //sets all previous safeChosen to null!!
+                self.safeCenters().forEach(function(center) {
+                    var name = center.name.toLowerCase();
+                    if (name.indexOf(searchQuery) !== -1 ) {
+                        self.safeChosen.push(center);
+                        //console.log("safe chosen", center);
+                    }
+                })
             return self.safeChosen();
             }
         });
@@ -93,7 +105,7 @@ function initMap() {
         self.listItemClicked = function(data){
         //console.log("listItemClicked", data.type, data.marker);
             populateInfoWindow(data.marker, largeInfoWindow);
-            loadData(data.type); //loads additional content from external sources
+            loadData(data.name, data.type); //loads additional content from external sources
         };
 
         self.selectContent = ko.computed(function(){
@@ -103,10 +115,10 @@ function initMap() {
 //Adds content to info window when marker is clicked.
 //Only one info window can be open at any time.
 
+
 function populateInfoWindow(marker, infoWindow) {
     if (infoWindow.marker != marker) {
         infoWindow.marker = marker;
-
         infoWindow.setContent('<div>' + marker.title +  ', see below for more' + '</div>');
         infoWindow.open(map, marker);
         infoWindow.marker.setAnimation(google.maps.Animation.BOUNCE);
@@ -142,9 +154,11 @@ function fullyPopulateMap () {
 
     markerM.push(marker);
 
+// question - how can I use the type to load specific data and
+//reflect this without accessing the DOM
     marker.addListener("click", function(){
         populateInfoWindow(this, largeInfoWindow);
-        loadData(type);
+        loadData(name, type);
     });
 
     center.marker = marker; //re-assign newly constructed marker
@@ -157,13 +171,13 @@ function fullyPopulateMap () {
 
 //Sorts centers that match search query into a new array
 
-function populateFilteredMap(searchQuery) {
-self.safeCenters().forEach(function(center){
-    var title = center.name;
-    var nameToSearch =  center.name.toLowerCase();
-    var searchQueryLower = searchQuery.toLowerCase();
-    var position = center.position;
-    var type = center.type;
+    function populateFilteredMap(searchQuery) {
+    self.safeCenters().forEach(function(center){
+        var title = center.name;
+        var nameToSearch =  center.name.toLowerCase();
+        var searchQueryLower = searchQuery.toLowerCase();
+        var position = center.position;
+        var type = center.type;
 
         if (nameToSearch.indexOf(searchQueryLower) !== -1) {
           // Create a marker
@@ -176,78 +190,82 @@ self.safeCenters().forEach(function(center){
             id: center
           });
 
-        markerM.push(marker);
+          markerM.push(marker);
 
-        marker.addListener('click', function(){
-        populateInfoWindow(this, largeInfoWindow);
-        loadData(type);
-        });
-        center.marker = marker;
-      }
+          marker.addListener('click', function(){
+            populateInfoWindow(this, largeInfoWindow);
+            loadData(title, type);
+            });
+          center.marker = marker;
+        }
     });
     //console.log('Putting searchInput markers on map', markerM );
     showMarkers();
 
-}
+    }
 
 
     function setMapOnAll(map) {
-    for (var i = 0; i<markerM.length; i++){
-    markerM[i].setMap(map);
+        for (var i = 0; i<markerM.length; i++){
+            markerM[i].setMap(map);
+        }
     }
-}
 
 // Delete all markers in the array
     function deleteMarkers(){
-    setMapOnAll(null);
-    markerM = [];
-}
+        setMapOnAll(null);
+        markerM = [];
+    }
 
     function showMarkers() {
-    setMapOnAll(map);
-}
+        setMapOnAll(map);
+    }
 
     function clearMarkers() {
-    setMapOnAll(null);
-}
+        setMapOnAll(null);
+    }
 
 
 //Load data assembles the new content from information sources (e.g. NYT) based on the type passed.
 //However, these sources do not fully support queries based on type. The dynamic content is respSummary.
 
-function loadData(type) {
-
+    function loadData(name, type) {
+//Question - two problems - info source does not support name based queries, only type
+//update DOM without accessing ..using KO.
+//Dispatch URL returns XML data. Would liket to use NYT, Dispatch, Google, WIKI
 //Form queries that are acceptable to different external sources based on user selected 'type'
-var query = 'human trafficking' + ' ' + type;
-var city = 'Columbus';
-var state = "OH";
+        var query = 'human trafficking' + ' ' + type;
+        var city = 'Columbus';
+        var state = "OH";
 
-    $(".contents").empty(); //empty out previous contents
+        $(".contents").empty(); //empty out previous contents
 
-    self.contents.push('<h3> More on ' + type + '</h3>');
+        self.contents.push('<h3> More on ' + name + ' and ' + type + '</h3>');
 
-    //console.log("In loadData", type, query, city, state); // am not able to get this to work thus have hardwired query parameters.
+        //console.log("In loadData", type, query, city, state); // am not able to get this to work thus have hardwired query parameters.
 
-// Built by NYT LucyBot. www.lucybot.com
+
+
+    // Built by NYT LucyBot. www.lucybot.com
     //Article Search API key: 020cabcb3a92b8c411f8f88110edb095:13:38869805
-    var nytRequestTimeout = setTimeout(function() {
-        $nsfElem.text("No relevant resources");
-    }, 8000);
+        var nytRequestTimeout = setTimeout(function() {
+            $nsfElem.text("No relevant resources");
+        }, 8000);
 
-    var url = "https://api.nytimes.com/svc/search/v2/articlesearch.json";
-    url += '?' + $.param({
+        var url = "https://api.nytimes.com/svc/search/v2/articlesearch.json";
+        url += '?' + $.param({
         'api-key': "020cabcb3a92b8c411f8f88110edb095:13:38869805",
         'q': 'human trafficking ohio',
         'fl': "abstract"
-    });
+        });
 
-    $.ajax({
-        url: url,
-        method: 'GET'
-    }).done(function(result) {
-        var articles = [];
-        var length = 0;
-        articles = result.response.docs;
+        $.ajax({
+            url: url,
+            method: 'GET'
+        }).done(function(result) {
+            var articles = [];
+            var length = 0;
+            articles = result.response.docs;
 
         for (var i in articles) {
             if (articles[i].abstract !== null) {
@@ -255,7 +273,7 @@ var state = "OH";
             }
         }
         //console.log("nyt", self.contents());
-    }).fail(function(jqXHR, exception) {
+        }).fail(function(jqXHR, exception) {
         // Our error logic here
         var msg = 'err';
         if (jqXHR.status === 0) {
@@ -359,10 +377,26 @@ var state = "OH";
     });
     clearTimeout(wikiRequestTimeout);
 
+/*Question....Dispatch query need help
+$.ajax({
+       url: 'http://purl.org/dc/elements/1.1/' version="2.0",
+       data: JSON.stringify({url: feedUrl}),
+       contentType:"application/json",
+       success: function (result, status){
+
+                 var entries = result.feed.entries,
+                     entriesLen = entries.length,
+                     entryTemplate = Handlebars.compile($('.tpl-entry').html());
+                        for (var i = 0; i < articleList.length; i++) {
+                            articleStr = articleList[i];
+                            var url = 'http://en.wikipedia.org/wiki/' + articleStr;
+                            self.contents.push('<p>' + " Wiki: " + '<a href="' + url + '">' + articleStr + '</a></p>');
+*/
 
 
-};
+    };
 }
+
 var mapsError = function() {
 alert("Google Maps failed to load");
 }
