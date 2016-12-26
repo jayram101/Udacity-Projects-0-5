@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Udacity - Project 5 v3</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="js/libs/jquery.min.js"></script>
+    <script src="js/libs/knockout-3.4.0.js"></script>
+</head>
+
+<body>
+    <div id="header">
+        <h3>Safe Centers in Columbus, Ohio</h3>
+    </div>
+
+
+<div id="nav">
+
+    <div id = "search">
+    <input type="search" name="search" placeholder='Enter a center...' data-bind = 'textInput:searchInput, valueUpdate:"keyup"' autocomplete="off">
+    </div>
+    <br>
+
+    <div>
+    <italic>Selected centers: <span data-bind="text:searchInput"></span></italic>
+    </div>
+
+    <div>
+        <ul data-bind = "foreach: selectCenters">
+        <input type = "checkbox" data-bind = "click: $parent.listItemClicked">
+        <span data-bind = "text: name"></span><br>
+        </ul>
+    </div>
+
+</div>
+
+
+<div id="map" style="width:100%;height:480px;"> Google Map </div>
+<div id="pano"></div>
+
+<div id = "footer">
+        <ul class="contents" data-bind="foreach: selectContent">
+          <p class="generatedArticle" data-bind="html: $data"></p>
+        </ul>
+</div>
+
+<script async defer
+      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyARqBsd2hZYkdvQicvNwfhAwIwCmtMGSE4&callback=initMap">
+    </script>
+
+<script src="js/scriptmap.js"></script>
+
+</body>
+</html>
